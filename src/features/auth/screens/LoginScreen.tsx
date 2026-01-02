@@ -2,14 +2,14 @@ import { useRouter } from 'expo-router';
 import { ArrowRight, ChevronLeft, Eye, EyeOff, Lock, Mail, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -110,7 +110,7 @@ export function LoginScreen() {
               <TouchableOpacity 
                 className="bg-violet-600 h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-violet-900/40 mt-4 active:scale-95 transition-transform"
                 activeOpacity={0.8}
-                onPress={() => router.replace('/(tabs)')}
+                onPress={() => router.replace('/(tabs)/feed' as any)}
               >
                 <Text className="text-white font-bold text-lg mr-2">Iniciar Sesión</Text>
                 <ArrowRight size={24} color="white" />
