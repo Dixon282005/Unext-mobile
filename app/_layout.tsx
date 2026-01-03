@@ -1,9 +1,9 @@
-import { supabase } from '@/lib/supabase'; // Asegúrate que este path sea correcto
+import { supabase } from '@/lib/supabase';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import "../styles/global.css"; // Tus estilos globales
+import "../styles/global.css";
 
 export default function RootLayout() {
   const [session, setSession] = useState<any>(null);
@@ -12,7 +12,7 @@ export default function RootLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-    // 1. Escuchamos si el usuario entra o sale (Login/Logout)
+    // 1. Escuchamos Auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setInitialized(true);
@@ -24,24 +24,21 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
 
-    // 2. Lógica de Protección (El "Portero de Discoteca") 👮‍♂️
-    
-    // ¿En qué grupo de carpetas estamos?
-    const inAuthGroup = segments[0] === '(auth)';
+    // 2. Portero de Discoteca 👮‍♂️
     const inTabsGroup = segments[0] === '(tabs)';
-    const isWelcomeScreen = segments.length === 0; // Es el index.tsx raíz
 
     if (session && !inTabsGroup) {
-      // CASO A: Tienes sesión, pero estás en Login o Bienvenida -> Vete a la App
-      router.replace('/(tabs)');
+      // CASO A: Tienes sesión -> Vete al FEED (no a la carpeta vacía)
+      // 👇 AQUÍ ESTABA EL ERROR
+      router.replace('/(tabs)/feed' ); 
+      
     } else if (!session && inTabsGroup) {
-      // CASO B: NO tienes sesión y quieres entrar a la App -> Vete a la Bienvenida
+      // CASO B: Sin sesión -> Vete a la Bienvenida
       router.replace('/'); 
     }
   }, [session, initialized, segments]);
 
-  // 3. Pantalla de carga (Splash Screen casero)
-  // Se muestra mientras preguntamos a SecureStore si hay sesión
+  // 3. Loading
   if (!initialized) {
     return (
       <View className="flex-1 justify-center items-center bg-slate-950">
@@ -51,10 +48,8 @@ export default function RootLayout() {
     );
   }
 
-  // 4. Renderizamos la App
   return (
     <>
-      {/* Slot renderiza el hijo actual: (tabs), (auth) o index */}
       <Slot /> 
       <StatusBar style="light" />
     </>

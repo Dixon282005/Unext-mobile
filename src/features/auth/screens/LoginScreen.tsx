@@ -2,6 +2,8 @@ import { useRouter } from 'expo-router';
 import { ArrowRight, ChevronLeft, Eye, EyeOff, Lock, Mail, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
+  ActivityIndicator // 👈 1. Importamos esto para el loading
+  ,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -14,15 +16,21 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+// 👈 2. Importamos el Hook
+import { useAuth } from '@/features/auth/hooks/useAuth';
+
 export function LoginScreen() {
   const router = useRouter();
+  
+  // 👈 3. Sacamos la función y el estado de carga del Hook
+  const { signInWithEmail, loading } = useAuth();
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      {/* Esto evita que el teclado tape los inputs */}
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -30,7 +38,6 @@ export function LoginScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View className="flex-1 px-6 justify-center">
 
-            {/* Botón de Atrás (Opcional) */}
             <TouchableOpacity 
               onPress={() => router.back()} 
               className="absolute top-4 left-6 z-10 w-10 h-10 bg-white/5 rounded-full items-center justify-center border border-white/10"
@@ -38,7 +45,6 @@ export function LoginScreen() {
               <ChevronLeft size={24} color="white" />
             </TouchableOpacity>
 
-            {/* --- HEADER: LOGO UNEXT --- */}
             <Animated.View 
               entering={FadeInDown.duration(800).springify()} 
               className="items-center mb-10"
@@ -54,13 +60,11 @@ export function LoginScreen() {
               </Text>
             </Animated.View>
 
-            {/* --- FORMULARIO --- */}
             <Animated.View 
               entering={FadeInUp.delay(200).duration(800).springify()} 
               className="space-y-5"
             >
               
-              {/* Input: Email */}
               <View className="space-y-2">
                 <Text className="text-slate-400 ml-1 text-sm font-medium">Correo Electrónico</Text>
                 <View className="bg-white/5 border border-white/10 rounded-2xl flex-row items-center px-4 h-14 focus:border-violet-500 transition-colors">
@@ -78,7 +82,6 @@ export function LoginScreen() {
                 </View>
               </View>
 
-              {/* Input: Password */}
               <View className="space-y-2">
                 <Text className="text-slate-400 ml-1 text-sm font-medium">Contraseña</Text>
                 <View className="bg-white/5 border border-white/10 rounded-2xl flex-row items-center px-4 h-14">
@@ -101,24 +104,29 @@ export function LoginScreen() {
                 </View>
               </View>
 
-              {/* Link: Olvidé contraseña */}
               <TouchableOpacity className="self-end pt-1">
                 <Text className="text-violet-400 font-semibold text-sm">¿Olvidaste tu contraseña?</Text>
               </TouchableOpacity>
 
-              {/* Botón: Iniciar Sesión */}
+              {/* 👇 4. BOTÓN ACTUALIZADO CON LÓGICA REAL */}
               <TouchableOpacity 
-                className="bg-violet-600 h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-violet-900/40 mt-4 active:scale-95 transition-transform"
+                className={`bg-violet-600 h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-violet-900/40 mt-4 active:scale-95 transition-transform ${loading ? 'opacity-50' : ''}`}
                 activeOpacity={0.8}
-                onPress={() => router.replace('/(tabs)/feed' as any)}
+                disabled={loading} // Deshabilita si está cargando
+                onPress={() => signInWithEmail(email, password)} // 🔥 LLAMA AL HOOK
               >
-                <Text className="text-white font-bold text-lg mr-2">Iniciar Sesión</Text>
-                <ArrowRight size={24} color="white" />
+                {loading ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <>
+                    <Text className="text-white font-bold text-lg mr-2">Iniciar Sesión</Text>
+                    <ArrowRight size={24} color="white" />
+                  </>
+                )}
               </TouchableOpacity>
 
             </Animated.View>
 
-            {/* --- FOOTER --- */}
             <Animated.View 
               entering={FadeInUp.delay(400).duration(800)} 
               className="mt-10 flex-row justify-center items-center"

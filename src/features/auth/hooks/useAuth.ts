@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'; // Asegúrate de que esta ruta coincida con tu archivo de configuración
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert } from 'react-native';
@@ -23,9 +23,9 @@ export function useAuth() {
 
       if (error) throw error;
       
-      // Si todo sale bien, el _layout.tsx nos redirigirá, 
-      // pero por seguridad forzamos la ruta al Home (Tabs)
-      router.replace('/(tabs)/feed');
+      // ✅ CORRECCIÓN: Quitamos el router.replace manual.
+      // El _layout.tsx detectará la sesión y nos moverá automáticamente.
+      console.log("Login exitoso. Esperando redirección del Layout...");
 
     } catch (error: any) {
       Alert.alert('Error al entrar', error.message);
@@ -48,18 +48,18 @@ export function useAuth() {
         password,
         options: {
           data: {
-            full_name: fullName, // Guardamos el nombre real en la metadata del usuario
+            full_name: fullName,
           },
         },
       });
 
       if (error) throw error;
 
-      // Verificamos si Supabase pide confirmar email o deja pasar directo
       if (!data.session) {
         Alert.alert('¡Registro Exitoso!', 'Por favor revisa tu correo para confirmar la cuenta.');
       } else {
-        router.replace('/(tabs)');
+        // ✅ CORRECCIÓN: Aquí también quitamos la redirección manual.
+        console.log("Registro exitoso. Esperando redirección del Layout...");
       }
 
     } catch (error: any) {
@@ -74,6 +74,8 @@ export function useAuth() {
     setLoading(true);
     try {
       await supabase.auth.signOut();
+      // En el logout sí podemos forzar la salida por seguridad, 
+      // aunque el layout también lo haría.
       router.replace('/(auth)/login');
     } catch (error: any) {
       console.error('Error saliendo:', error.message);
@@ -82,7 +84,6 @@ export function useAuth() {
     }
   };
 
-  // Exportamos las funciones y el estado de carga
   return {
     signInWithEmail,
     signUpWithEmail,
