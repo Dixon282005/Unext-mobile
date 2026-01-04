@@ -3,6 +3,13 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert } from 'react-native';
 
+// Definimos qué datos extra pueden venir en el registro
+interface RegisterMetadata {
+  firstName: string;
+  lastName: string;
+  userType: 'talent' | 'company';
+}
+
 export function useAuth() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -23,9 +30,8 @@ export function useAuth() {
 
       if (error) throw error;
       
-      // ✅ CORRECCIÓN: Quitamos el router.replace manual.
-      // El _layout.tsx detectará la sesión y nos moverá automáticamente.
-      console.log("Login exitoso. Esperando redirección del Layout...");
+      // El _layout.tsx detectará el cambio de sesión y redirigirá.
+      console.log("Login exitoso.");
 
     } catch (error: any) {
       Alert.alert('Error al entrar', error.message);
@@ -35,7 +41,13 @@ export function useAuth() {
   };
 
   // --- 2. REGISTRARSE (Sign Up) ---
-  const signUpWithEmail = async (email: string, password: string, fullName: string) => {
+  // 👇 ACTUALIZADO: Ahora recibe 'metadata' con los campos extra
+  const signUpWithEmail = async (
+    email: string, 
+    password: string, 
+    fullName: string,
+    metadata?: RegisterMetadata 
+  ) => {
     if (!email || !password || !fullName) {
       Alert.alert('Error', 'Todos los campos son obligatorios');
       return;
@@ -48,7 +60,10 @@ export function useAuth() {
         password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fullName, // Nombre completo para mostrar
+            // 👇 Aquí desglosamos los datos extra (firstName, lastName, userType)
+            // para que se guarden en la columna 'raw_user_meta_data' de Supabase
+            ...metadata 
           },
         },
       });
@@ -58,8 +73,7 @@ export function useAuth() {
       if (!data.session) {
         Alert.alert('¡Registro Exitoso!', 'Por favor revisa tu correo para confirmar la cuenta.');
       } else {
-        // ✅ CORRECCIÓN: Aquí también quitamos la redirección manual.
-        console.log("Registro exitoso. Esperando redirección del Layout...");
+        console.log("Registro exitoso.");
       }
 
     } catch (error: any) {
@@ -74,9 +88,7 @@ export function useAuth() {
     setLoading(true);
     try {
       await supabase.auth.signOut();
-      // En el logout sí podemos forzar la salida por seguridad, 
-      // aunque el layout también lo haría.
-      router.replace('/(auth)/login');
+      // El _layout.tsx nos mandará al login automáticamente.
     } catch (error: any) {
       console.error('Error saliendo:', error.message);
     } finally {

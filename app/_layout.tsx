@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+// 👇 Asegúrate de importar View y ActivityIndicator
 import { ActivityIndicator, View } from 'react-native';
 import "../styles/global.css";
 
@@ -12,7 +13,6 @@ export default function RootLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-    // 1. Escuchamos Auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setInitialized(true);
@@ -24,21 +24,15 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
 
-    // 2. Portero de Discoteca 👮‍♂️
     const inTabsGroup = segments[0] === '(tabs)';
 
     if (session && !inTabsGroup) {
-      // CASO A: Tienes sesión -> Vete al FEED (no a la carpeta vacía)
-      // 👇 AQUÍ ESTABA EL ERROR
-      router.replace('/(tabs)/feed' ); 
-      
+      router.replace('/(tabs)/feed'); 
     } else if (!session && inTabsGroup) {
-      // CASO B: Sin sesión -> Vete a la Bienvenida
       router.replace('/'); 
     }
   }, [session, initialized, segments]);
 
-  // 3. Loading
   if (!initialized) {
     return (
       <View className="flex-1 justify-center items-center bg-slate-950">
@@ -48,10 +42,12 @@ export default function RootLayout() {
     );
   }
 
+
   return (
-    <>
+    // Usamos una View con flex: 1. Esto le grita al iPhone: "¡OCUPA TODO EL ESPACIO!"
+    <View style={{ flex: 1, backgroundColor: 'black' }}>
       <Slot /> 
       <StatusBar style="light" />
-    </>
+    </View>
   );
 }

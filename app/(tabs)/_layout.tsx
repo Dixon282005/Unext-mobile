@@ -1,59 +1,59 @@
 import { Tabs } from 'expo-router';
 import { Briefcase, Home, User, Users } from 'lucide-react-native';
 import React from 'react';
+import { Platform } from 'react-native'; // 👈 Importamos Platform
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false, // Ocultamos el header nativo (usaremos el nuestro)
+        headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#ffffff', // Fondo blanco (Estilo Web/Ejecutivo)
+          backgroundColor: '#ffffff',
           borderTopWidth: 1,
-          borderTopColor: '#e2e8f0', // Borde sutil gris (slate-200)
-          height: 60,
-          paddingBottom: 8,
+          borderTopColor: '#e2e8f0',
+          // 👇 LÓGICA PARA IPHONE vs ANDROID
+          height: Platform.OS === 'ios' ? 88 : 60, // En iOS más alto (88), en Android normal (60)
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8, // En iOS empujamos los iconos hacia arriba
           paddingTop: 8,
         },
-        tabBarActiveTintColor: '#7c3aed', // Violeta activo (violet-600)
-        tabBarInactiveTintColor: '#94a3b8', // Gris inactivo (slate-400)
-        tabBarShowLabel: true, // Mostrar texto abajo (opcional)
+        tabBarActiveTintColor: '#7c3aed',
+        tabBarInactiveTintColor: '#94a3b8',
+        tabBarShowLabel: true,
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
+          // Ajuste fino para que el texto no quede pegado al borde en Android
+          marginBottom: Platform.OS === 'android' ? 4 : 0, 
         },
       }}
     >
-      {/* 1. Feed (Inicio) */}
       <Tabs.Screen
-        name="feed" // ⚠️ IMPORTANTE: Coincide con feed.tsx
+        name="feed"
         options={{
           title: 'Inicio',
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
 
-      {/* 2. Network (Red) */}
       <Tabs.Screen
-        name="network" // Coincide con network.tsx
+        name="network"
         options={{
           title: 'Mi Red',
           tabBarIcon: ({ color, size }) => <Users size={size} color={color} />,
         }}
       />
 
-      {/* 3. Jobs (Empleos) */}
       <Tabs.Screen
-        name="jobs" // Coincide con jobs.tsx
+        name="jobs"
         options={{
           title: 'Empleos',
           tabBarIcon: ({ color, size }) => <Briefcase size={size} color={color} />,
         }}
       />
 
-      {/* 4. Profile (Perfil) */}
       <Tabs.Screen
-        name="profile" // Coincide con profile.tsx
+        name="profile"
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color, size }) => <User size={size} color={color} />,

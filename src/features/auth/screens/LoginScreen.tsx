@@ -1,145 +1,122 @@
 import { useRouter } from 'expo-router';
-import { ArrowRight, ChevronLeft, Eye, EyeOff, Lock, Mail, Zap } from 'lucide-react-native';
+import { ChevronLeft, Eye, EyeOff, Lock, Mail, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator // 👈 1. Importamos esto para el loading
-  ,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
-} from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-// 👈 2. Importamos el Hook
-import { useAuth } from '@/features/auth/hooks/useAuth';
+// 👇 Importamos TUS Componentes Globales
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Screen } from '@/components/ui/Screen';
+import { useAuth } from '../hooks/useAuth';
 
 export function LoginScreen() {
   const router = useRouter();
-  
-  // 👈 3. Sacamos la función y el estado de carga del Hook
   const { signInWithEmail, loading } = useAuth();
 
-  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // 🛠️ LÓGICA REPARADA: Navegación Segura
+  // Evita el error rojo si no hay historial
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/'); // Si no se puede volver, vamos a la bienvenida
+    }
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+    // 👇 safeArea: Evita chocar con la hora/batería
+    // 👇 px-6: Agrega margen a los lados
+    <Screen scroll safeArea className="bg-white px-6">
+      
+      {/* Botón Atrás (Con lógica segura) */}
+      <View className="mt-2 items-start">
+        <TouchableOpacity 
+          onPress={handleBack} 
+          className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center border border-slate-200"
+        >
+          <ChevronLeft size={24} color="#1e293b" />
+        </TouchableOpacity>
+      </View>
+
+      {/* HEADER: Logo y Título */}
+      <Animated.View 
+        entering={FadeInDown.duration(800).springify()} 
+        className="items-center my-8"
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1 px-6 justify-center">
+        <View className="bg-violet-100 p-4 rounded-3xl mb-4 shadow-sm">
+          <Zap size={48} color="#7c3aed" fill="#7c3aed" />
+        </View>
+        <Text className="text-slate-900 text-4xl font-extrabold tracking-tighter">
+          UNEXT<Text className="text-violet-600">.</Text>
+        </Text>
+        <Text className="text-slate-500 text-base font-medium mt-2">
+          Bienvenido de vuelta
+        </Text>
+      </Animated.View>
 
-            <TouchableOpacity 
-              onPress={() => router.back()} 
-              className="absolute top-4 left-6 z-10 w-10 h-10 bg-white/5 rounded-full items-center justify-center border border-white/10"
-            >
-              <ChevronLeft size={24} color="white" />
-            </TouchableOpacity>
+      {/* FORMULARIO */}
+      {/* space-y-4: Separa los inputs para que respiren */}
+      <Animated.View 
+        entering={FadeInUp.delay(200).duration(800).springify()} 
+        className="space-y-4" 
+      >
+        
+        {/* Input Email */}
+        <Input 
+          label="Correo Electrónico"
+          placeholder="ejemplo@unext.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          icon={<Mail size={20} color="#64748b" />}
+          value={email}
+          onChangeText={setEmail}
+        />
 
-            <Animated.View 
-              entering={FadeInDown.duration(800).springify()} 
-              className="items-center mb-10"
-            >
-              <View className="bg-violet-600/20 p-4 rounded-3xl border border-violet-500/30 mb-4 shadow-[0_0_30px_rgba(139,92,246,0.3)]">
-                <Zap size={48} color="#8b5cf6" fill="#8b5cf6" />
-              </View>
-              <Text className="text-white text-4xl font-extrabold tracking-tighter">
-                UNEXT<Text className="text-violet-500">.</Text>
-              </Text>
-              <Text className="text-slate-400 text-base font-medium mt-2">
-                Tu futuro profesional empieza aquí
-              </Text>
-            </Animated.View>
+        {/* Input Password */}
+        <Input 
+          label="Contraseña"
+          placeholder="••••••••"
+          secureTextEntry={!showPassword}
+          icon={<Lock size={20} color="#64748b" />}
+          value={password}
+          onChangeText={setPassword}
+          rightIcon={showPassword ? <EyeOff size={20} color="#64748b"/> : <Eye size={20} color="#64748b"/>}
+          onRightIconPress={() => setShowPassword(!showPassword)}
+        />
 
-            <Animated.View 
-              entering={FadeInUp.delay(200).duration(800).springify()} 
-              className="space-y-5"
-            >
-              
-              <View className="space-y-2">
-                <Text className="text-slate-400 ml-1 text-sm font-medium">Correo Electrónico</Text>
-                <View className="bg-white/5 border border-white/10 rounded-2xl flex-row items-center px-4 h-14 focus:border-violet-500 transition-colors">
-                  <Mail size={20} color="#94a3b8" />
-                  <TextInput 
-                    className="flex-1 text-white ml-3 text-base font-medium"
-                    placeholder="ejemplo@unext.com"
-                    placeholderTextColor="#475569"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                    cursorColor="#8b5cf6"
-                  />
-                </View>
-              </View>
+        {/* Link Olvidé Contraseña */}
+        <TouchableOpacity className="self-end mb-2">
+          <Text className="text-violet-600 font-bold text-sm">¿Olvidaste tu contraseña?</Text>
+        </TouchableOpacity>
 
-              <View className="space-y-2">
-                <Text className="text-slate-400 ml-1 text-sm font-medium">Contraseña</Text>
-                <View className="bg-white/5 border border-white/10 rounded-2xl flex-row items-center px-4 h-14">
-                  <Lock size={20} color="#94a3b8" />
-                  <TextInput 
-                    className="flex-1 text-white ml-3 text-base font-medium"
-                    placeholder="••••••••"
-                    placeholderTextColor="#475569"
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={setPassword}
-                    cursorColor="#8b5cf6"
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    {showPassword 
-                      ? <EyeOff size={20} color="#94a3b8" /> 
-                      : <Eye size={20} color="#94a3b8" />
-                    }
-                  </TouchableOpacity>
-                </View>
-              </View>
+        {/* Botón Principal (Con margen arriba extra) */}
+        <View className="pt-2">
+          <Button 
+            title="Iniciar Sesión"
+            onPress={() => signInWithEmail(email, password)}
+            loading={loading}
+            className="shadow-violet-200"
+          />
+        </View>
 
-              <TouchableOpacity className="self-end pt-1">
-                <Text className="text-violet-400 font-semibold text-sm">¿Olvidaste tu contraseña?</Text>
-              </TouchableOpacity>
+      </Animated.View>
 
-              {/* 👇 4. BOTÓN ACTUALIZADO CON LÓGICA REAL */}
-              <TouchableOpacity 
-                className={`bg-violet-600 h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-violet-900/40 mt-4 active:scale-95 transition-transform ${loading ? 'opacity-50' : ''}`}
-                activeOpacity={0.8}
-                disabled={loading} // Deshabilita si está cargando
-                onPress={() => signInWithEmail(email, password)} // 🔥 LLAMA AL HOOK
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <>
-                    <Text className="text-white font-bold text-lg mr-2">Iniciar Sesión</Text>
-                    <ArrowRight size={24} color="white" />
-                  </>
-                )}
-              </TouchableOpacity>
+      {/* FOOTER */}
+      <Animated.View 
+        entering={FadeInUp.delay(400).duration(800)} 
+        className="mt-12 flex-row justify-center items-center pb-10"
+      >
+        <Text className="text-slate-500 font-medium">¿Aún no eres miembro? </Text>
+        <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+          <Text className="text-violet-600 font-bold text-lg">Regístrate</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
-            </Animated.View>
-
-            <Animated.View 
-              entering={FadeInUp.delay(400).duration(800)} 
-              className="mt-10 flex-row justify-center items-center"
-            >
-              <Text className="text-slate-500 font-medium">¿Aún no eres miembro? </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                <Text className="text-violet-400 font-bold text-lg">Regístrate</Text>
-              </TouchableOpacity>
-            </Animated.View>
-
-          </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Screen>
   );
 }

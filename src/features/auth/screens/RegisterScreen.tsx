@@ -1,170 +1,203 @@
 import { useRouter } from 'expo-router';
-import { ArrowRight, ChevronLeft, Lock, Mail, User } from 'lucide-react-native';
+import { Briefcase, ChevronLeft, Eye, EyeOff, Lock, Mail, User } from 'lucide-react-native';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator // 👈 Agregado para el loading
-  ,
-
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View
-} from 'react-native';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
+// 👇 Importamos TUS Componentes Globales
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Screen } from '@/components/ui/Screen';
 import { useAuth } from '../hooks/useAuth';
 
 export function RegisterScreen() {
   const router = useRouter();
-  const { signUpWithEmail, loading } = useAuth();
+  // ⚠️ Asegúrate de actualizar tu hook useAuth para recibir estos nuevos datos
+  const { signUpWithEmail, loading } = useAuth(); 
 
-  const [fullName, setFullName] = useState('');
+  // Estados del Formulario
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Estado para el Tipo de Usuario (Por defecto 'talent')
+  const [userType, setUserType] = useState<'talent' | 'company'>('talent');
+  
+  // Estados para visibilidad de contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = () => {
-    signUpWithEmail(email, password, fullName);
+    // 1. Validaciones básicas
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      Alert.alert("Campos incompletos", "Por favor llena todos los campos.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Las contraseñas no coinciden.");
+      return;
+    }
+
+    // 2. Preparamos los datos
+    // Concatenamos nombre para el display, pero enviamos todo a la DB
+    const fullName = `${firstName} ${lastName}`; 
+    const metadata = {
+        firstName,
+        lastName,
+        userType // 'talent' o 'company'
+    };
+
+    // 3. Llamamos al registro (Pasando la metadata extra)
+    // NOTA: Tu hook useAuth debe estar preparado para recibir 'metadata' o el objeto extra.
+    signUpWithEmail(email, password, fullName, metadata); 
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" />
+    <Screen scroll safeArea className="bg-white px-6">
       
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+      {/* Botón Atrás */}
+      <View className="mt-2 items-start">
+        <TouchableOpacity 
+          onPress={() => router.back()} 
+          className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center border border-slate-200"
+        >
+          <ChevronLeft size={24} color="#1e293b" />
+        </TouchableOpacity>
+      </View>
+
+      {/* HEADER */}
+      <Animated.View 
+        entering={FadeInDown.duration(800).springify()} 
+        className="items-center my-6"
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          {/* 👇 CAMBIO CLAVE: Usamos ScrollView en vez de View fijo */}
-          <ScrollView 
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
-            showsVerticalScrollIndicator={false}
-            className="flex-1 px-6 relative"
-          >
+        <Text className="text-slate-900 text-3xl font-extrabold tracking-tight">
+          Crea tu cuenta 🚀
+        </Text>
+        <Text className="text-slate-500 text-base font-medium mt-1 text-center">
+          Únete como Talento o Empresa
+        </Text>
+      </Animated.View>
 
-            {/* Decoración de fondo */}
-            <View className="absolute top-0 left-0 w-72 h-72 bg-violet-100/50 rounded-full blur-3xl -ml-24 -mt-24" />
-            <View className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-100/50 rounded-full blur-3xl -mr-24 -mb-24" />
+      {/* FORMULARIO */}
+      <Animated.View 
+        entering={FadeInUp.delay(200).duration(800).springify()} 
+        className="space-y-4"
+      >
+        
+        {/* SELECTOR DE TIPO DE USUARIO */}
+        <View className="flex-row gap-3 mb-2">
+            {/* Opción Talento */}
+            <TouchableOpacity 
+                onPress={() => setUserType('talent')}
+                className={`flex-1 flex-row items-center justify-center p-4 rounded-2xl border transition-all ${
+                    userType === 'talent' 
+                    ? 'bg-violet-600 border-violet-600' 
+                    : 'bg-slate-50 border-slate-200'
+                }`}
+            >
+                <User size={20} color={userType === 'talent' ? 'white' : '#64748b'} />
+                <Text className={`ml-2 font-bold ${userType === 'talent' ? 'text-white' : 'text-slate-500'}`}>
+                    Talento
+                </Text>
+            </TouchableOpacity>
 
-            {/* Botón Atrás */}
-            <View className="items-start mb-6">
-              <TouchableOpacity 
-                onPress={() => router.back()} 
-                className="w-12 h-12 bg-slate-100 rounded-full items-center justify-center border border-slate-200 shadow-sm"
-              >
-                <ChevronLeft size={24} color="#1e293b" />
-              </TouchableOpacity>
+            {/* Opción Empresa */}
+            <TouchableOpacity 
+                onPress={() => setUserType('company')}
+                className={`flex-1 flex-row items-center justify-center p-4 rounded-2xl border transition-all ${
+                    userType === 'company' 
+                    ? 'bg-violet-600 border-violet-600' 
+                    : 'bg-slate-50 border-slate-200'
+                }`}
+            >
+                <Briefcase size={20} color={userType === 'company' ? 'white' : '#64748b'} />
+                <Text className={`ml-2 font-bold ${userType === 'company' ? 'text-white' : 'text-slate-500'}`}>
+                    Empresa
+                </Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* Nombre y Apellido (En una fila o separados, aquí los pongo separados para móvil) */}
+        <View className="flex-row gap-3">
+            <View className="flex-1">
+                <Input 
+                  label="Nombre"
+                  placeholder="Juan"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                />
             </View>
+            <View className="flex-1">
+                <Input 
+                  label="Apellido"
+                  placeholder="Pérez"
+                  value={lastName}
+                  onChangeText={setLastName}
+                />
+            </View>
+        </View>
 
-            {/* HEADER */}
-            <Animated.View 
-              entering={FadeInDown.duration(800).springify()} 
-              className="items-center mb-8"
-            >
-              <Text className="text-slate-900 text-3xl font-extrabold tracking-tight">
-                Crea tu cuenta 🚀
-              </Text>
-              <Text className="text-slate-500 text-base font-medium mt-2 text-center">
-                Únete a la red profesional del futuro.
-              </Text>
-            </Animated.View>
+        {/* Correo */}
+        <Input 
+          label="Correo Electrónico"
+          placeholder="ejemplo@unext.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          icon={<Mail size={20} color="#64748b" />}
+          value={email}
+          onChangeText={setEmail}
+        />
 
-            {/* FORMULARIO */}
-            <Animated.View 
-              entering={FadeInUp.delay(200).duration(800).springify()} 
-              className="space-y-4"
-            >
-              
-              {/* Input: Nombre Completo */}
-              <View className="space-y-2">
-                <Text className="text-slate-700 ml-1 text-sm font-bold">Nombre Completo</Text>
-                <View className="bg-slate-50 border border-slate-200 rounded-2xl flex-row items-center px-4 h-14 focus:border-violet-600 focus:bg-white transition-all">
-                  <User size={20} color="#64748b" />
-                  <TextInput 
-                    className="flex-1 text-slate-900 ml-3 text-base font-medium"
-                    placeholder="Juan Pérez"
-                    placeholderTextColor="#94a3b8"
-                    value={fullName}
-                    onChangeText={setFullName}
-                    cursorColor="#7c3aed"
-                  />
-                </View>
-              </View>
+        {/* Contraseña */}
+        <Input 
+          label="Contraseña"
+          placeholder="Mínimo 6 caracteres"
+          secureTextEntry={!showPassword}
+          icon={<Lock size={20} color="#64748b" />}
+          value={password}
+          onChangeText={setPassword}
+          rightIcon={showPassword ? <EyeOff size={20} color="#64748b"/> : <Eye size={20} color="#64748b"/>}
+          onRightIconPress={() => setShowPassword(!showPassword)}
+        />
 
-              {/* Input: Email */}
-              <View className="space-y-2">
-                <Text className="text-slate-700 ml-1 text-sm font-bold">Correo Electrónico</Text>
-                <View className="bg-slate-50 border border-slate-200 rounded-2xl flex-row items-center px-4 h-14 focus:border-violet-600 focus:bg-white transition-all">
-                  <Mail size={20} color="#64748b" />
-                  <TextInput 
-                    className="flex-1 text-slate-900 ml-3 text-base font-medium"
-                    placeholder="ejemplo@unext.com"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    value={email}
-                    onChangeText={setEmail}
-                    cursorColor="#7c3aed"
-                  />
-                </View>
-              </View>
+        {/* Repetir Contraseña */}
+        <Input 
+          label="Confirmar Contraseña"
+          placeholder="Repite tu contraseña"
+          secureTextEntry={!showConfirmPassword}
+          icon={<Lock size={20} color="#64748b" />}
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          rightIcon={showConfirmPassword ? <EyeOff size={20} color="#64748b"/> : <Eye size={20} color="#64748b"/>}
+          onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        />
 
-              {/* Input: Password */}
-              <View className="space-y-2">
-                <Text className="text-slate-700 ml-1 text-sm font-bold">Contraseña</Text>
-                <View className="bg-slate-50 border border-slate-200 rounded-2xl flex-row items-center px-4 h-14 focus:border-violet-600 focus:bg-white transition-all">
-                  <Lock size={20} color="#64748b" />
-                  <TextInput 
-                    className="flex-1 text-slate-900 ml-3 text-base font-medium"
-                    placeholder="Mínimo 6 caracteres"
-                    placeholderTextColor="#94a3b8"
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                    cursorColor="#7c3aed"
-                  />
-                </View>
-              </View>
+        {/* Botón de Registro */}
+        <View className="pt-4">
+          <Button 
+            title={userType === 'company' ? "Registrar Empresa" : "Registrarme"}
+            onPress={handleRegister}
+            loading={loading}
+            className="shadow-violet-200"
+          />
+        </View>
 
-              {/* Botón: Registrarse */}
-              <TouchableOpacity 
-                className={`bg-violet-600 h-16 rounded-2xl flex-row items-center justify-center shadow-lg shadow-violet-200 mt-6 active:scale-95 ${loading ? 'opacity-70' : ''}`}
-                activeOpacity={0.8}
-                disabled={loading}
-                onPress={handleRegister}
-              >
-                {loading ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <>
-                    <Text className="text-white font-bold text-lg mr-2">Registrarse</Text>
-                    <ArrowRight size={24} color="white" />
-                  </>
-                )}
-              </TouchableOpacity>
+      </Animated.View>
 
-            </Animated.View>
+      {/* FOOTER */}
+      <Animated.View 
+        entering={FadeInUp.delay(400).duration(800)} 
+        className="mt-8 mb-6 flex-row justify-center items-center pb-10"
+      >
+        <Text className="text-slate-500 font-medium">¿Ya tienes cuenta? </Text>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text className="text-violet-600 font-bold text-lg">Inicia Sesión</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
-            {/* FOOTER */}
-            <Animated.View 
-              entering={FadeInUp.delay(400).duration(800)} 
-              className="mt-10 mb-6 flex-row justify-center items-center"
-            >
-              <Text className="text-slate-500 font-medium">¿Ya tienes cuenta? </Text>
-              <TouchableOpacity onPress={() => router.back()}>
-                <Text className="text-violet-600 font-bold text-lg">Inicia Sesión</Text>
-              </TouchableOpacity>
-            </Animated.View>
-
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    </Screen>
   );
 }

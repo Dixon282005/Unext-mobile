@@ -1,137 +1,170 @@
-import { useAuth } from '@/features/auth/hooks/useAuth'; // Para probar el Logout
-import { Heart, LogOut, MessageSquare, MoreHorizontal, Search, Share2 } from 'lucide-react-native';
-import React from 'react';
-import { FlatList, Image, StatusBar, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Heart, LogOut, MessageCircle, MoreHorizontal, Share2 } from 'lucide-react-native';
+import React, { useCallback } from 'react';
+import { Alert, FlatList, Image, TouchableOpacity, View } from 'react-native';
 
-// Datos falsos para que se vea bonito de entrada
-const DUMMY_POSTS = [
+// Importamos componentes UI
+import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { Divider } from '@/components/ui/Divider';
+import { Screen } from '@/components/ui/Screen';
+import { ThemedText } from '@/components/ui/ThemedText';
+
+// Importamos el hook de autenticación
+import { useAuth } from '@/features/auth/hooks/useAuth';
+
+// Datos de prueba
+const POSTS = [
   {
     id: '1',
-    user: 'María Rodriguez',
-    role: 'UX Designer en Google',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d',
-    content: '¡Feliz de anunciar que he comenzado mi nuevo puesto como Senior UX Designer! 🚀 #NewJob #UX #Design',
-    time: '2h',
+    user: {
+      name: 'Maria Rodriguez',
+      role: 'UX Designer en Google',
+      avatar: 'https://i.pravatar.cc/150?u=maria',
+    },
+    time: 'Hace 2h',
+    content: '¡Emocionada de anunciar que terminé mi certificación de Diseño Accesible! 🎨✨ La inclusión no es una "feature", es un derecho.',
+    tags: ['UX', 'Design', 'Inclusión'],
     likes: 45,
-    comments: 12
+    comments: 12,
   },
   {
     id: '2',
-    user: 'Carlos Pérez',
-    role: 'Desarrollador React Native',
-    avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-    content: '¿Alguien más está usando Expo Router v3? La navegación basada en archivos es una locura. 🔥 Aquí probando el nuevo stack.',
-    time: '5h',
-    likes: 120,
-    comments: 34
+    user: {
+      name: 'Carlos Tech',
+      role: 'Desarrollador React Native',
+      avatar: null, 
+    },
+    time: 'Hace 5h',
+    content: 'Buscando desarrolladores Junior para proyecto en Unext. Stack: React Native + Expo + Supabase. ¿Interesados? 👇',
+    tags: ['Empleo', 'Remoto', 'React'],
+    likes: 128,
+    comments: 45,
+    image: 'https://images.unsplash.com/photo-1555099962-4199c345e5dd?q=80&w=1000&auto=format&fit=crop', 
   },
   {
     id: '3',
-    user: 'Ana García',
-    role: 'Recruiter IT',
-    avatar: 'https://i.pravatar.cc/150?u=a04258114e29026302d',
-    content: 'Estamos buscando talento joven en Venezuela para trabajo remoto. ¡Envíenme su portafolio! 🇻🇪💻',
-    time: '1d',
-    likes: 89,
-    comments: 56
+    user: {
+      name: 'Ana Sofía',
+      role: 'Recruiter IT',
+      avatar: 'https://i.pravatar.cc/150?u=ana',
+    },
+    time: 'Hace 1d',
+    content: 'Consejo del día: Tu portafolio vale más que tu título universitario en el mundo Tech. 💼🔥',
+    tags: ['Consejos', 'Carrera', 'Tech'],
+    likes: 230,
+    comments: 89,
   }
 ];
 
-export function FeedScreen() {
-  const { signOut } = useAuth(); // Hook para cerrar sesión
+export default function FeedScreen() {
+  const { signOut } = useAuth(); 
 
-  // Componente para cada tarjeta (Post)
-  const renderItem = ({ item }: { item: any }) => (
-    <View className="bg-white mb-3 p-4 rounded-xl shadow-sm border border-slate-100 mx-4">
+  const handleLogout = () => {
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro que quieres salir?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Salir", style: "destructive", onPress: signOut }
+      ]
+    );
+  };
+
+  const renderPost = useCallback(({ item }: { item: typeof POSTS[0] }) => (
+    <Card className="mx-4 mb-4 border border-slate-200 shadow-sm bg-white rounded-2xl overflow-hidden">
       
-      {/* Header del Post */}
-      <View className="flex-row justify-between items-start mb-3">
-        <View className="flex-row gap-3">
-          <Image 
-            source={{ uri: item.avatar }} 
-            className="w-10 h-10 rounded-full bg-slate-200" 
-          />
-          <View>
-            <Text className="font-bold text-slate-900 text-base">{item.user}</Text>
-            <Text className="text-slate-500 text-xs">{item.role}</Text>
-            <Text className="text-slate-400 text-xs mt-0.5">{item.time} • 🌎</Text>
-          </View>
+      {/* 1. HEADER */}
+      <View className="flex-row items-center mb-3">
+        <Avatar uri={item.user.avatar} fallback={item.user.name} size="md" />
+        
+        <View className="ml-3 flex-1">
+          <ThemedText variant="h2" className="text-base font-bold text-slate-900">
+            {item.user.name}
+          </ThemedText>
+          <ThemedText variant="caption" className="text-slate-500 text-xs font-medium">
+            {item.user.role} • {item.time}
+          </ThemedText>
         </View>
-        <TouchableOpacity>
+
+        <TouchableOpacity className="p-1">
           <MoreHorizontal size={20} color="#94a3b8" />
         </TouchableOpacity>
       </View>
 
-      {/* Contenido */}
-      <Text className="text-slate-800 text-base leading-6 mb-4">
+      {/* 2. CONTENIDO */}
+      <ThemedText variant="body" className="mb-3 text-slate-700 leading-6">
         {item.content}
-      </Text>
+      </ThemedText>
 
-      {/* Línea divisoria */}
-      <View className="h-[1px] bg-slate-100 mb-3" />
+      {/* Imagen opcional */}
+      {item.image && (
+        <Image 
+          source={{ uri: item.image }} 
+          className="w-full h-52 rounded-xl mb-4 bg-slate-100"
+          resizeMode="cover"
+        />
+      )}
 
-      {/* Acciones (Like, Comment, Share) */}
-      <View className="flex-row justify-between px-2">
-        <TouchableOpacity className="flex-row items-center gap-2">
-          <Heart size={20} color="#64748b" />
-          <Text className="text-slate-500 text-sm font-medium">{item.likes}</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity className="flex-row items-center gap-2">
-          <MessageSquare size={20} color="#64748b" />
-          <Text className="text-slate-500 text-sm font-medium">{item.comments}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="flex-row items-center gap-2">
-          <Share2 size={20} color="#64748b" />
-          <Text className="text-slate-500 text-sm font-medium">Compartir</Text>
-        </TouchableOpacity>
+      {/* Tags */}
+      <View className="flex-row flex-wrap gap-2 mb-4">
+        {item.tags.map(tag => (
+          // Asegúrate de usar variantes que existan en tu Badge.tsx (secondary, outline, etc)
+          <Badge key={tag} label={tag} variant="success" />
+        ))}
       </View>
-    </View>
-  );
+
+      <Divider className="my-1 bg-slate-100" />
+
+      {/* 3. FOOTER (Botones) */}
+      <View className="flex-row justify-between items-center mt-2 px-1">
+        
+        <TouchableOpacity className="flex-row items-center space-x-1 py-1 px-2 rounded-lg active:bg-slate-50">
+          <Heart size={20} color="#64748b" />
+          <ThemedText variant="caption" className="ml-2 font-medium text-slate-600">{item.likes}</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="flex-row items-center space-x-1 py-1 px-2 rounded-lg active:bg-slate-50">
+          <MessageCircle size={20} color="#64748b" />
+          <ThemedText variant="caption" className="ml-2 font-medium text-slate-600">{item.comments}</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="flex-row items-center space-x-1 py-1 px-2 rounded-lg active:bg-slate-50">
+          <Share2 size={20} color="#64748b" />
+        </TouchableOpacity>
+
+      </View>
+    </Card>
+  ), []);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50" edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
-
-      {/* Top Bar (Header) */}
-      <View className="flex-row justify-between items-center px-6 py-4 bg-white border-b border-slate-100 mb-4 sticky top-0 z-10">
-        <View className="flex-row items-center gap-2">
-           <View className="w-8 h-8 bg-violet-600 rounded-lg items-center justify-center">
-             <Text className="text-white font-bold text-lg">U</Text>
-           </View>
-           <Text className="text-xl font-extrabold text-slate-900 tracking-tight">Unext</Text>
+    // 👇 AQUÍ ESTÁ EL ARREGLO 1: safeArea={true} para respetar el notch
+    <Screen safeArea className="bg-slate-50"> 
+      
+      {/* HEADER PRINCIPAL */}
+      <View className="flex-row justify-between items-center px-6 py-3 bg-slate-50 z-10">
+        <View>
+          <ThemedText variant="h1" className="text-3xl font-extrabold tracking-tighter text-slate-900">
+            Unext<ThemedText className="text-violet-600">.</ThemedText>
+          </ThemedText>
         </View>
 
-        <View className="flex-row gap-4">
-          <TouchableOpacity className="bg-slate-50 p-2 rounded-full border border-slate-100">
-            <Search size={22} color="#64748b" />
-          </TouchableOpacity>
-          
-          {/* Botón Logout (Temporal para pruebas) */}
-          <TouchableOpacity 
-            onPress={signOut}
-            className="bg-red-50 p-2 rounded-full border border-red-100"
-          >
-            <LogOut size={22} color="#ef4444" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity 
+          onPress={handleLogout}
+          className="bg-white p-2.5 rounded-full shadow-sm border border-slate-200 active:scale-95 transition-transform"
+        >
+           <LogOut size={20} color="#ef4444" />
+        </TouchableOpacity>
       </View>
 
-      {/* Lista de Posts */}
       <FlatList
-        data={DUMMY_POSTS}
-        renderItem={renderItem}
+        data={POSTS}
+        renderItem={renderPost}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        ListHeaderComponent={
-          <Text className="mx-6 mb-4 text-slate-500 font-bold text-xs uppercase tracking-widest">
-            Tu Feed Principal
-          </Text>
-        }
+        // 👇 AQUÍ ESTÁ EL ARREGLO 2: Padding inferior generoso (120) para que no choque con los Tabs
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }} 
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

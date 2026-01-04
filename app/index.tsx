@@ -1,20 +1,63 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { ArrowRight, Zap } from 'lucide-react-native'; // Agregué el icono Zap para el logo
-import React from 'react';
+import { ArrowRight, Zap } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function WelcomeScreen() {
-  const router = useRouter();
+// Importamos tus nuevas pantallas
+import { OnboardingScreen } from '@/features/onboarding/screens/Onboarding';
+import { SplashScreen } from '@/features/onboarding/screens/SplashScreen';
 
+export default function Index() {
+  const router = useRouter();
+  
+  // Estados para controlar qué pantalla mostrar
+  const [isSplashVisible, setSplashVisible] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isReady, setIsReady] = useState(false); // Para saber cuando todo terminó de cargar
+
+  // Lógica de inicio
+  const handleSplashComplete = async () => {
+    try {
+      // Leemos si ya vio el tutorial
+      const hasSeen = await AsyncStorage.getItem('hasSeenOnboarding');
+      
+      if (hasSeen === 'true') {
+        // Ya es usuario recurrente -> Mostrar Welcome (Tu diseño)
+        setShowOnboarding(false);
+      } else {
+        // Es usuario nuevo -> Mostrar Onboarding
+        setShowOnboarding(true);
+      }
+    } catch (e) {
+      setShowOnboarding(true); // Ante la duda, mostramos tutorial
+    } finally {
+      // Ocultamos splash y mostramos el contenido real
+      setSplashVisible(false);
+      setIsReady(true);
+    }
+  };
+
+  // 1. Mostrar Splash Screen al inicio
+  if (isSplashVisible) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  // 2. Mostrar Onboarding si es usuario nuevo
+  if (showOnboarding) {
+    return <OnboardingScreen />;
+  }
+
+  // 3. Mostrar TU PANTALLA WELCOME (Si ya vio el tutorial)
+  // 👇 Aquí está tu diseño intacto 👇
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Iconos de batería/wifi en color negro */}
       <StatusBar barStyle="dark-content" />
 
-      {/* Círculos de fondo (Ajustados para verse sutiles en blanco) */}
-      <View className="absolute top-0 left-0 w-full h-full overflow-hidden">
+      {/* Círculos de fondo (Ajustados) */}
+      <View className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <View className="absolute -top-20 -left-20 w-80 h-80 bg-violet-200/40 rounded-full blur-3xl" />
         <View className="absolute top-1/3 -right-20 w-60 h-60 bg-blue-200/40 rounded-full blur-3xl" />
         <View className="absolute -bottom-20 left-1/3 w-80 h-80 bg-indigo-200/40 rounded-full blur-3xl" />
