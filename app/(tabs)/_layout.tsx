@@ -1,9 +1,14 @@
 import { Tabs } from 'expo-router';
 import { Briefcase, Home, User, Users } from 'lucide-react-native';
 import React from 'react';
-import { Platform } from 'react-native'; // 👈 Importamos Platform
+import { Platform } from 'react-native';
+// 👇 1. Importamos el hook para medir los márgenes seguros
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
+  // 👇 2. Obtenemos las medidas exactas del dispositivo actual
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -12,9 +17,16 @@ export default function TabsLayout() {
           backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: '#e2e8f0',
-          // 👇 LÓGICA PARA IPHONE vs ANDROID
-          height: Platform.OS === 'ios' ? 88 : 60, // En iOS más alto (88), en Android normal (60)
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8, // En iOS empujamos los iconos hacia arriba
+          
+          // 👇 3. ALTURA DINÁMICA:
+          // Base de 60px + lo que mida la barra del sistema (insets.bottom)
+          height: 60 + insets.bottom, 
+          
+          // 👇 4. PADDING DINÁMICO:
+          // Empujamos los iconos hacia arriba para que no los tape la barra negra
+          // Si insets.bottom es 0 (Android viejos), queda 8px. Si es 34 (iPhone), queda 42px.
+          paddingBottom: insets.bottom + 8, 
+          
           paddingTop: 8,
         },
         tabBarActiveTintColor: '#7c3aed',
@@ -23,8 +35,8 @@ export default function TabsLayout() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
-          // Ajuste fino para que el texto no quede pegado al borde en Android
-          marginBottom: Platform.OS === 'android' ? 4 : 0, 
+          // Un pequeño ajuste para que el texto no baile
+          marginBottom: Platform.OS === 'android' ? 0 : 0, 
         },
       }}
     >
