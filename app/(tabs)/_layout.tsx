@@ -1,12 +1,11 @@
 import { Tabs } from 'expo-router';
-import { Briefcase, Home, User, Users } from 'lucide-react-native';
+// 👇 Agregamos 'Zap' y 'View' a los imports
+import { Briefcase, Home, User, Users, Zap } from 'lucide-react-native';
 import React from 'react';
-import { Platform } from 'react-native';
-// 👇 1. Importamos el hook para medir los márgenes seguros
+import { Platform, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabsLayout() {
-  // 👇 2. Obtenemos las medidas exactas del dispositivo actual
   const insets = useSafeAreaInsets();
 
   return (
@@ -18,28 +17,22 @@ export default function TabsLayout() {
           borderTopWidth: 1,
           borderTopColor: '#e2e8f0',
           
-          // 👇 3. ALTURA DINÁMICA:
-          // Base de 60px + lo que mida la barra del sistema (insets.bottom)
+          // Altura dinámica
           height: 60 + insets.bottom, 
-          
-          // 👇 4. PADDING DINÁMICO:
-          // Empujamos los iconos hacia arriba para que no los tape la barra negra
-          // Si insets.bottom es 0 (Android viejos), queda 8px. Si es 34 (iPhone), queda 42px.
           paddingBottom: insets.bottom + 8, 
-          
           paddingTop: 8,
         },
         tabBarActiveTintColor: '#7c3aed',
         tabBarInactiveTintColor: '#94a3b8',
         tabBarShowLabel: true,
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 10, // 👇 Reduje un poco la letra para que quepan 5 tabs
           fontWeight: '600',
-          // Un pequeño ajuste para que el texto no baile
           marginBottom: Platform.OS === 'android' ? 0 : 0, 
         },
       }}
     >
+      {/* 1. Feed */}
       <Tabs.Screen
         name="feed"
         options={{
@@ -48,6 +41,7 @@ export default function TabsLayout() {
         }}
       />
 
+      {/* 2. Network */}
       <Tabs.Screen
         name="network"
         options={{
@@ -56,6 +50,26 @@ export default function TabsLayout() {
         }}
       />
 
+      {/* 3. MAGIC MATCH (El Botón Central) */}
+      <Tabs.Screen
+        name="match" // ⚠️ Asegúrate que el archivo 'match.tsx' esté en la carpeta (tabs)
+        options={{
+          title: 'Match',
+          tabBarIcon: ({ focused }) => (
+            // 👇 Diseño especial: Botón con fondo cuando está activo
+            <View className={`items-center justify-center p-1 rounded-full ${focused ? 'bg-violet-100' : ''} -mt-1`}>
+               <Zap size={26} color="#7c3aed" fill={focused ? "#7c3aed" : "none"} />
+            </View>
+          ),
+          tabBarLabelStyle: {
+            color: '#7c3aed', // Texto siempre violeta
+            fontWeight: '800',
+            fontSize: 10
+          }
+        }}
+      />
+
+      {/* 4. Jobs */}
       <Tabs.Screen
         name="jobs"
         options={{
@@ -64,6 +78,7 @@ export default function TabsLayout() {
         }}
       />
 
+      {/* 5. Profile */}
       <Tabs.Screen
         name="profile"
         options={{

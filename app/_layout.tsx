@@ -2,8 +2,9 @@ import { supabase } from '@/lib/supabase';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-// 👇 Asegúrate de importar View y ActivityIndicator
 import { ActivityIndicator, View } from 'react-native';
+// 👇 1. IMPORTANTE: Importamos esto
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import "../styles/global.css";
 
 export default function RootLayout() {
@@ -42,12 +43,12 @@ export default function RootLayout() {
     );
   }
 
-
   return (
-    // Usamos una View con flex: 1. Esto le grita al iPhone: "¡OCUPA TODO EL ESPACIO!"
-    <View style={{ flex: 1, backgroundColor: 'black' }}>
+    // 👇 2. CAMBIO CLAVE: Cambiamos View por GestureHandlerRootView
+    // Esto activa el sistema de gestos para toda la app (necesario para Magic Match)
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Slot /> 
       <StatusBar style="light" />
-    </View>
+    </GestureHandlerRootView>
   );
 }
