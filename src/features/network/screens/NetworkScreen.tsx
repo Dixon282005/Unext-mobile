@@ -52,7 +52,7 @@ export default function NetworkScreen() {
       {INVITATIONS.length > 0 && (
         <View className="mb-6 px-4">
             <View className="flex-row justify-between items-center mb-3">
-                <ThemedText variant="h3" className="text-slate-700">Invitaciones ({INVITATIONS.length})</ThemedText>
+                <ThemedText variant="h2" className="text-slate-700">Invitaciones ({INVITATIONS.length})</ThemedText>
                 <TouchableOpacity>
                     <ThemedText className="text-violet-600 font-bold text-sm">Ver todas</ThemedText>
                 </TouchableOpacity>
@@ -71,7 +71,7 @@ export default function NetworkScreen() {
 
       {/* 4. Sugerencias (Grid de 2 columnas) */}
       <View className="px-4 pb-24">
-         <ThemedText variant="h3" className="text-slate-700 mb-3">Gente que podrías conocer</ThemedText>
+         <ThemedText variant="h2" className="text-slate-700 mb-3">Gente que podrías conocer</ThemedText>
          
          <View className="flex-row flex-wrap justify-between">
             {SUGGESTIONS.map(user => (
