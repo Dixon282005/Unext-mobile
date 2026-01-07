@@ -2,10 +2,10 @@ import { Heart, X, Zap } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Dimensions, TouchableOpacity, View } from 'react-native';
 import Animated, {
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
 } from 'react-native-reanimated';
 
 // Importamos tus componentes UI
@@ -13,7 +13,7 @@ import { Screen } from '@/components/ui/Screen';
 import { ThemedText } from '@/components/ui/ThemedText';
 
 // Importamos la Tarjeta que diseñamos antes
-// ⚠️ Asegúrate de que este archivo exista en src/features/matching/components/MatchCard.tsx
+
 import { MatchCard } from '@/features/matching/components/MatchCard';
 
 // --- DATOS DE PRUEBA (Candidatos) ---
