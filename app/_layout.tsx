@@ -3,7 +3,6 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-// 👇 1. IMPORTANTE: Importamos esto
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import "../styles/global.css";
 
@@ -25,13 +24,23 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
 
+    // 👇 1. Definimos las zonas protegidas
+    // '(tabs)' cubre: Feed, Network, Jobs, Profile y Match
+    // 'chat' cubre: La pantalla de chats
     const inTabsGroup = segments[0] === '(tabs)';
+    const inChatGroup = segments[0] === 'chat';
+    
+    const inProtectedGroup = inTabsGroup || inChatGroup;
 
-    if (session && !inTabsGroup) {
-      router.replace('/(tabs)/feed'); 
-    } else if (!session && inTabsGroup) {
+    if (!session && inProtectedGroup) {
+      // 🛑 CASO 1: No hay usuario y quiere entrar a lo privado -> Mandar al Login
       router.replace('/'); 
+    } else if (session && !inProtectedGroup) {
+      // 🚀 CASO 2: Hay usuario y NO está en lo privado (está en el Login) -> Mandar al Feed
+      // Al usar "!inProtectedGroup" evitamos usar .length === 0 y TypeScript se calma.
+      router.replace('/(tabs)/feed'); 
     }
+    
   }, [session, initialized, segments]);
 
   if (!initialized) {
@@ -44,8 +53,6 @@ export default function RootLayout() {
   }
 
   return (
-    // 👇 2. CAMBIO CLAVE: Cambiamos View por GestureHandlerRootView
-    // Esto activa el sistema de gestos para toda la app (necesario para Magic Match)
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Slot /> 
       <StatusBar style="light" />

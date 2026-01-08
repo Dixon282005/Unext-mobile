@@ -3,19 +3,19 @@ import { LogOut, MessageCircle, Search } from 'lucide-react-native';
 import React from 'react';
 import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 
-// 1. Importamos Componentes UI Globales
+// UI Components
 import { Screen } from '@/components/ui/Screen';
 import { ThemedText } from '@/components/ui/ThemedText';
 
-// 2. Importamos los Componentes del Feature (Arquitectura Limpia)
+// Features Components
 import { CreatePostInput } from '@/features/feed/components/CreatePostInput';
 import { PostCard } from '@/features/feed/components/PostCard';
 import { StoriesRail } from '@/features/feed/components/StoriesRail';
 
-// 3. Auth
+// Auth
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
-// --- DATOS DE PRUEBA (MOCK) ---
+// MOCK DATA
 const POSTS = [
   {
     id: '1',
@@ -52,79 +52,58 @@ export default function FeedScreen() {
   const { signOut } = useAuth(); 
 
   const handleLogout = () => {
-    Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro que quieres salir?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Salir", style: "destructive", onPress: signOut }
-      ]
-    );
+    Alert.alert("Cerrar Sesión", "¿Seguro?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Salir", style: "destructive", onPress: signOut }
+    ]);
   };
 
-  // 👇 Esta función agrupa todo lo que va ARRIBA de los posts
-  // para que scrollee junto con la lista (ListHeaderComponent)
   const renderHeader = () => (
     <View className="mb-2">
-      {/* 1. Historias (Tipo Instagram/Facebook) */}
       <StoriesRail />      
-      
-      {/* 2. Caja de Publicar (Tipo LinkedIn) */}
       <CreatePostInput />  
     </View>
   );
 
   return (
-    // Fondo gris claro (slate-100) para contraste con tarjetas blancas
-  
+    // 👇 CAMBIO: bg-white en lugar de bg-slate-100
+    <Screen safeArea className="bg-white"> 
       
-      <Screen safeArea className="bg-slate-100"> 
-      
-      {/* --- NAVBAR SUPERIOR ACTUALIZADO --- */}
-      <View className="flex-row justify-between items-center px-4 py-3 bg-white border-b border-slate-200 z-10">
+      {/* HEADER SUPERIOR */}
+      {/* Quitamos el borde inferior (border-b) para que se fusione con el fondo blanco limpiamente */}
+      <View className="flex-row justify-between items-center px-4 py-2 bg-white z-10">
         <ThemedText variant="h1" className="text-2xl font-extrabold tracking-tighter text-slate-900">
           Unext<ThemedText className="text-violet-600">.</ThemedText>
         </ThemedText>
 
-        <View className="flex-row gap-2"> {/* Gap reducido un poco para que quepan todos */}
+        <View className="flex-row gap-2">
             
-            <TouchableOpacity className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
+            <TouchableOpacity className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center">
                 <Search size={20} color="#64748b" />
             </TouchableOpacity>
 
-            {/* 👇 NUEVO BOTÓN DE CHAT (Estilo Messenger) */}
+            {/* BOTÓN CHAT */}
             <TouchableOpacity 
-                onPress={() => router.push('/chat/index')} 
-                className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200 relative"
+                onPress={() => router.push("/chat")} 
+                className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center relative"
             >
                 <MessageCircle size={20} color="#64748b" />
-                {/* Badge rojo de notificación (Opcional) */}
                 <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
             </TouchableOpacity>
 
-            {/* <TouchableOpacity className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
-                <Bell size={20} color="#64748b" />
-            </TouchableOpacity> */}
-            {/* Comenté la campana para no saturar, pero puedes descomentarla si quieres los 4 botones */}
-
-            <TouchableOpacity onPress={handleLogout} className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
+            <TouchableOpacity onPress={handleLogout} className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center">
                 <LogOut size={20} color="#ef4444" />
             </TouchableOpacity>
         </View>
       </View>
 
-      {/* --- LISTA PRINCIPAL --- */}
+      {/* LISTA */}
       <FlatList
         data={POSTS}
-        // Renderizamos cada tarjeta usando el componente separado
         renderItem={({ item }) => <PostCard post={item} />} 
         keyExtractor={item => item.id}
-        
-        // Inyectamos el Header (Historias + Input) aquí
         ListHeaderComponent={renderHeader}
-        
         showsVerticalScrollIndicator={false}
-        // Padding inferior para no chocar con el Tab Bar
         contentContainerStyle={{ paddingBottom: 100 }}
       />
     </Screen>
