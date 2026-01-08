@@ -94,7 +94,7 @@ export default function FeedScreen() {
 
             {/* 👇 NUEVO BOTÓN DE CHAT (Estilo Messenger) */}
             <TouchableOpacity 
-                onPress={() => router.push('/chat')} 
+                onPress={() => router.push('/chat/index')} 
                 className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200 relative"
             >
                 <MessageCircle size={20} color="#64748b" />
