@@ -1,4 +1,5 @@
-import { Bell, LogOut, Search } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { LogOut, MessageCircle, Search } from 'lucide-react-native';
 import React from 'react';
 import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 
@@ -47,6 +48,7 @@ const POSTS = [
 ];
 
 export default function FeedScreen() {
+  const router = useRouter();
   const { signOut } = useAuth(); 
 
   const handleLogout = () => {
@@ -74,23 +76,39 @@ export default function FeedScreen() {
 
   return (
     // Fondo gris claro (slate-100) para contraste con tarjetas blancas
-    <Screen safeArea className="bg-slate-100"> 
+  
       
-      {/* --- NAVBAR SUPERIOR --- */}
+      <Screen safeArea className="bg-slate-100"> 
+      
+      {/* --- NAVBAR SUPERIOR ACTUALIZADO --- */}
       <View className="flex-row justify-between items-center px-4 py-3 bg-white border-b border-slate-200 z-10">
         <ThemedText variant="h1" className="text-2xl font-extrabold tracking-tighter text-slate-900">
           Unext<ThemedText className="text-violet-600">.</ThemedText>
         </ThemedText>
 
-        <View className="flex-row gap-3">
-            <TouchableOpacity className="p-2 bg-slate-50 rounded-full active:bg-slate-200">
-                <Search size={22} color="#64748b" />
+        <View className="flex-row gap-2"> {/* Gap reducido un poco para que quepan todos */}
+            
+            <TouchableOpacity className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
+                <Search size={20} color="#64748b" />
             </TouchableOpacity>
-            <TouchableOpacity className="p-2 bg-slate-50 rounded-full active:bg-slate-200">
-                <Bell size={22} color="#64748b" />
+
+            {/* 👇 NUEVO BOTÓN DE CHAT (Estilo Messenger) */}
+            <TouchableOpacity 
+                onPress={() => router.push('/chat')} 
+                className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200 relative"
+            >
+                <MessageCircle size={20} color="#64748b" />
+                {/* Badge rojo de notificación (Opcional) */}
+                <View className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleLogout} className="p-2 bg-slate-50 rounded-full active:bg-slate-200">
-                <LogOut size={22} color="#ef4444" />
+
+            {/* <TouchableOpacity className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
+                <Bell size={20} color="#64748b" />
+            </TouchableOpacity> */}
+            {/* Comenté la campana para no saturar, pero puedes descomentarla si quieres los 4 botones */}
+
+            <TouchableOpacity onPress={handleLogout} className="w-10 h-10 bg-slate-50 rounded-full items-center justify-center active:bg-slate-200">
+                <LogOut size={20} color="#ef4444" />
             </TouchableOpacity>
         </View>
       </View>
