@@ -24,9 +24,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (!initialized) return;
 
-    // 👇 1. Definimos las zonas protegidas
-    // '(tabs)' cubre: Feed, Network, Jobs, Profile y Match
-    // 'chat' cubre: La pantalla de chats
+ 
     const inTabsGroup = segments[0] === '(tabs)';
     const inChatGroup = segments[0] === 'chat';
     

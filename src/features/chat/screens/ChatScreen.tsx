@@ -10,7 +10,7 @@ import { ChatRow } from '../components/ChatRow'; // 👈 Importamos desde el mis
 // DATOS MOCK
 const CHATS = [
   { id: '1', name: 'Maria Rodriguez', message: '¡Gracias! Nos vemos mañana...', time: '10:30 AM', unread: 2, avatar: 'https://i.pravatar.cc/150?u=maria', online: true },
-  { id: '2', name: 'Carlos Tech', message: 'Te pasé el repo de GitHub.', time: 'Ayer', unread: 0, avatar: null, online: false },
+  { id: '2', name: 'Carlos Tech', message: 'Te quiero mamar ese guevito.', time: 'Ayer', unread: 0, avatar: null, online: false },
   { id: '3', name: 'Ana Sofía', message: '¿Recibiste mi CV?', time: 'Ayer', unread: 0, avatar: 'https://i.pravatar.cc/150?u=ana', online: true },
   { id: '4', name: 'Elon Musk', message: 'Compramos Unext por $1B? 🚀', time: 'Lun', unread: 1, avatar: 'https://i.pravatar.cc/150?u=elon', online: false },
 ];
